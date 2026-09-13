@@ -755,14 +755,40 @@ function fetchWeather() {
   els.weatherSource.textContent = "Locating…";
 
   navigator.geolocation.getCurrentPosition(
-    (position) => {
-      loadWeather(position.coords.latitude, position.coords.longitude, "Your location");
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      const placeLabel = await reverseGeocode(latitude, longitude);
+      loadWeather(latitude, longitude, placeLabel);
     },
     () => {
       loadWeather(WEATHER_FALLBACK.latitude, WEATHER_FALLBACK.longitude, WEATHER_FALLBACK.name);
     },
     { timeout: 6000, maximumAge: 10 * 60 * 1000 }
   );
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&localityLanguage=en`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!response.ok) throw new Error("Reverse-geocoding request failed");
+    const data = await response.json();
+
+    const city = data.city || data.locality || data.localityInfo?.administrative?.[2]?.name || "";
+    const region = data.principalSubdivision || "";
+    const country = data.countryName || "";
+
+    const parts = [city, region].filter(Boolean);
+    if (parts.length) return [...new Set(parts)].join(", ");
+    return country || "Current location";
+  } catch (error) {
+    console.warn("Reverse geocoding failed:", error);
+    return "Current location";
+  }
 }
 
 async function loadWeather(lat, lon, placeLabel) {
