@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0B1613" />
+<meta name="description" content="ESP32 Smart Irrigation monitoring and control dashboard" />
+<title>Fieldwell &middot; Smart Irrigation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ ICON SPRITE ============ -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5M6 10v9h5v-5h2v5h5v-9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.6V12l3.2 1.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M17.7 6.3l-1.7 1.7M8 16l-1.7 1.7M17.7 17.7 16 16M8 8 6.3 6.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 3.5s6.2 6.9 6.2 11.3a6.2 6.2 0 1 1-12.4 0C5.8 10.4 12 3.5 12 3.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M12 4.2a2.3 2.3 0 0 0-2.3 2.3v7.4a4 4 0 1 0 4.6 0V6.5A2.3 2.3 0 0 0 12 4.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="16.7" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-humidity" viewBox="0 0 24 24"><path d="M8 4.5h8M6.5 8.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/><path d="M12 8s5 5.6 5 9a5 5 0 0 1-10 0c0-3.4 5-9 5-9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tank" viewBox="0 0 24 24"><path d="M6 4h12l1.6 15.2a1 1 0 0 1-1 1.1H5.4a1 1 0 0 1-1-1.1L6 4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5.3 12.5c1.6 1 3 1 4.6 0s3-1 4.6 0 3 1 4.6 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h10.5a2.6 2.6 0 1 0-2.3-3.9M3 12.3h14.7a2.7 2.7 0 1 1-2.4 4M3 16.6h8.4a2.3 2.3 0 1 1-2 3.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.3M12 18.7V21M21 12h-2.3M5.3 12H3M18.1 5.9l-1.6 1.6M7.5 16.5l-1.6 1.6M18.1 18.1l-1.6-1.6M7.5 7.5 5.9 5.9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 17.5a4 4 0 0 1-.6-7.95 5 5 0 0 1 9.6-1.6 4.3 4.3 0 0 1-.6 9.55h-8.4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cloud-sun" viewBox="0 0 24 24"><circle cx="8" cy="8" r="2.8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 3.2v1.4M8 11v1.4M3.2 8h1.4M11.4 8h1M4.7 4.7l1 1M4.7 4.7l1 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 20.4a3.7 3.7 0 0 1-.5-7.36 4.6 4.6 0 0 1 8.86-1.5 4 4 0 0 1-.56 8.86H9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7.5 13.8a4 4 0 0 1-.6-7.95 5 5 0 0 1 9.6-1.6 4.3 4.3 0 0 1-.6 9.55h-8.4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 17.5 7.8 20M13 17.5l-1.2 2.5M17 17.5l-1.2 2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4.3 21 19.4H3L12 4.3Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M4 9.5a11.5 11.5 0 0 1 16 0M7 13a7 7 0 0 1 10 0M10.2 16.4a2.7 2.7 0 0 1 3.6 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="19.3" r="1.1" fill="currentColor"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 3.9 12 3.5l1 3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-drop-fill" viewBox="0 0 24 24"><path d="M12 3.5s6.2 6.9 6.2 11.3a6.2 6.2 0 1 1-12.4 0C5.8 10.4 12 3.5 12 3.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c-1-6.5 2-13 13-14 1.3 9.8-4.8 13.8-13 14Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 18c3-3.4 6-6 11.3-11.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24"><use href="#i-leaf"/></svg></span>
+      <div class="brand-text">
+        <strong>Fieldwell</strong>
+        <span>Zone 01 &middot; ESP32</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <button class="nav-item active" data-section="dashboard" aria-current="page">
+        <svg viewBox="0 0 24 24"><use href="#i-home"/></svg><span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-section="irrigation">
+        <svg viewBox="0 0 24 24"><use href="#i-bolt"/></svg><span>Irrigation</span>
+      </button>
+      <button class="nav-item" data-section="history">
+        <svg viewBox="0 0 24 24"><use href="#i-clock"/></svg><span>History</span>
+      </button>
+      <button class="nav-item" data-section="settings">
+        <svg viewBox="0 0 24 24"><use href="#i-gear"/></svg><span>Settings</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="device-card">
+        <div class="device-row">
+          <span class="status-dot connecting" id="sidebarStatusDot"></span>
+          <span id="sidebarStatusText">Connecting</span>
+        </div>
+        <div class="device-mode" id="sidebarModeText">Mode &mdash; &mdash;</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1 id="pageTitle">Good to grow</h1>
+        <p id="pageSubtitle">Everything in zone 01 is being watched in real time.</p>
+      </div>
+
+      <div class="topbar-right">
+        <div class="header-status">
+          <span class="status-dot connecting" id="headerStatusDot"></span>
+          <span id="headerStatusText">Connecting</span>
+        </div>
+        <div class="header-clock">
+          <strong class="tabular" id="currentDateTime">&mdash;</strong>
+          <span id="modeBadge">&mdash;</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="connection-banner" id="connectionBanner" hidden>
+      <svg viewBox="0 0 24 24" width="18" height="18"><use href="#i-alert"/></svg>
+      <div>
+        <strong id="connectionBannerTitle">Controller offline</strong>
+        <span id="connectionBannerMessage">The dashboard is running, but the ESP32 is not responding.</span>
+      </div>
+      <button id="retryConnectionBtn" class="text-button">Retry</button>
+    </div>
+
+    <div class="alerts-strip" id="alertsStrip" hidden></div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="page" id="dashboardSection">
+
+      <div class="hero-row">
+        <section class="card hero-card">
+          <div class="hero-top">
+            <div>
+              <p class="eyebrow">Soil moisture</p>
+              <span class="sensor-state normal" id="soilStateBadge">Normal</span>
+            </div>
+            <span class="live-chip"><i></i>Live</span>
+          </div>
+
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 200 200" class="gauge-svg">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0" stop-color="#4FB6E0"/>
+                  <stop offset="1" stop-color="#4ADE80"/>
+                </linearGradient>
+              </defs>
+              <circle cx="100" cy="100" r="82" class="gauge-track"/>
+              <circle cx="100" cy="100" r="82" class="gauge-progress" id="gaugeProgress"/>
+              <g id="gaugeMarkerOn" class="gauge-marker on"><line x1="184" y1="100" x2="196" y2="100"/></g>
+              <g id="gaugeMarkerOff" class="gauge-marker off"><line x1="184" y1="100" x2="196" y2="100"/></g>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-value tabular"><span id="moistureValue">&mdash;</span><small>%</small></span>
+              <span class="gauge-caption" id="moistureDescription">Waiting for sensor data</span>
+            </div>
+          </div>
+
+          <div class="hero-footer">
+            <div><span>Raw reading</span><strong class="tabular" id="rawMoistureValue">&#8212;</strong></div>
+            <div class="divider-v"></div>
+            <div><span>Pump ON below</span><strong class="tabular"><span id="autoOnLabel">35</span>%</strong></div>
+            <div class="divider-v"></div>
+            <div><span>Pump OFF above</span><strong class="tabular"><span id="autoOffLabel">60</span>%</strong></div>
+          </div>
+        </section>
+
+        <div class="metric-col">
+          <section class="card metric-tile" data-tile="temp">
+            <span class="metric-icon temp"><svg viewBox="0 0 24 24"><use href="#i-thermo"/></svg></span>
+            <div class="metric-body">
+              <span class="metric-label">Air temperature</span>
+              <span class="metric-value tabular"><span id="tempValue">&mdash;</span><small>&deg;C</small></span>
+            </div>
+            <svg class="spark" id="sparkTemp" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+          </section>
+
+          <section class="card metric-tile" data-tile="humidity">
+            <span class="metric-icon humidity"><svg viewBox="0 0 24 24"><use href="#i-humidity"/></svg></span>
+            <div class="metric-body">
+              <span class="metric-label">Air humidity</span>
+              <span class="metric-value tabular"><span id="humidityValue">&mdash;</span><small>%</small></span>
+            </div>
+            <svg class="spark" id="sparkHumidity" viewBox="0 0 100 32" preserveAspectRatio="none"></svg>
+          </section>
+
+          <section class="card metric-tile" data-tile="tank">
+            <span class="metric-icon tank"><svg viewBox="0 0 24 24"><use href="#i-tank"/></svg></span>
+            <div class="metric-body">
+              <span class="metric-label">Water tank level</span>
+              <span class="metric-value tabular"><span id="tankValue">&mdash;</span><small>%</small></span>
+            </div>
+            <div class="tank-bar"><span id="tankBarFill"></span></div>
+          </section>
+
+          <section class="card metric-tile" data-tile="wind">
+            <span class="metric-icon wind"><svg viewBox="0 0 24 24"><use href="#i-wind"/></svg></span>
+            <div class="metric-body">
+              <span class="metric-label">Wind speed</span>
+              <span class="metric-value tabular"><span id="windValue">&mdash;</span><small>km/h</small></span>
+            </div>
+            <span class="metric-sub" id="windDirection">&mdash;</span>
+          </section>
+        </div>
+
+        <section class="card weather-card">
+          <div class="section-head">
+            <p class="eyebrow">Local weather</p>
+            <span class="metric-sub" id="weatherSource">Locating&hellip;</span>
+          </div>
+          <div class="weather-main">
+            <span class="weather-icon" id="weatherIcon"><svg viewBox="0 0 24 24"><use href="#i-cloud-sun"/></svg></span>
+            <div>
+              <span class="weather-temp tabular" id="weatherTemp">&mdash;&deg;</span>
+              <span class="weather-desc" id="weatherDesc">Fetching conditions</span>
+            </div>
+          </div>
+          <div class="weather-grid">
+            <div><span>Feels like</span><strong class="tabular" id="weatherFeels">&mdash;</strong></div>
+            <div><span>Humidity</span><strong class="tabular" id="weatherHumidity">&mdash;</strong></div>
+            <div><span>Wind</span><strong class="tabular" id="weatherWind">&mdash;</strong></div>
+          </div>
+          <p class="weather-place" id="weatherPlace">&nbsp;</p>
+        </section>
+      </div>
+
+      <div class="mid-row">
+        <section class="card control-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Irrigation control</p>
+              <h2>Pump &amp; automation</h2>
+            </div>
+            <div class="pump-status" id="pumpStatus">
+              <span class="pump-indicator"></span><strong id="pumpStatusText">OFF</strong>
+            </div>
+          </div>
+
+          <p class="control-copy" id="pumpHelper">Automatic mode is active. The ESP32 controls the pump using the configured moisture thresholds.</p>
+
+          <div class="control-buttons">
+            <button class="ctrl-btn start" id="pumpOnBtn">
+              <svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Start
+            </button>
+            <button class="ctrl-btn stop" id="pumpOffBtn">
+              <svg viewBox="0 0 24 24"><use href="#i-stop"/></svg>Stop
+            </button>
+            <label class="ctrl-btn auto" id="autoModeLabel">
+              <svg viewBox="0 0 24 24"><use href="#i-auto"/></svg>Auto mode
+              <input type="checkbox" id="automaticToggle" hidden />
+            </label>
+          </div>
+
+          <form class="threshold-form" id="thresholdForm">
+            <label>
+              <span>Pump ON below</span>
+              <div class="number-field"><input id="pumpOnThreshold" type="number" min="0" max="99" value="35" inputmode="numeric" /><span>%</span></div>
+            </label>
+            <label>
+              <span>Pump OFF above</span>
+              <div class="number-field"><input id="pumpOffThreshold" type="number" min="1" max="100" value="60" inputmode="numeric" /><span>%</span></div>
+            </label>
+            <button type="submit" class="save-button" id="saveThresholdsBtn">Save thresholds</button>
+          </form>
+          <p class="form-message" id="thresholdValidation" aria-live="polite"></p>
+        </section>
+
+        <section class="card alerts-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Alerts</p>
+              <h2>Needs attention</h2>
+            </div>
+          </div>
+          <div class="alerts-list" id="alertsList">
+            <div class="alert-row ok">
+              <svg viewBox="0 0 24 24"><use href="#i-leaf"/></svg>
+              <span>No active alerts &mdash; conditions look healthy.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="trend-row">
+        <section class="card trend-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Trends</p>
+              <h2>Last 24 hours</h2>
+            </div>
+            <div class="tab-switch" id="trendTabs">
+              <button class="tab active" data-metric="moisture">Moisture</button>
+              <button class="tab" data-metric="climate">Temp &amp; humidity</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="trendChart" height="220"></canvas></div>
+        </section>
+
+        <section class="card usage-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Water usage</p>
+              <h2>Last 7 days</h2>
+            </div>
+            <span class="metric-sub" id="usageTotal">&mdash;</span>
+          </div>
+          <div class="chart-wrap"><canvas id="usageChart" height="220"></canvas></div>
+        </section>
+      </div>
+
+      <section class="card activity-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Event log</p>
+            <h2>Recent activity</h2>
+          </div>
+          <button class="text-button" id="viewHistoryBtn">View all</button>
+        </div>
+        <div class="activity-list" id="activityList">
+          <div class="activity-row">
+            <time class="tabular">&#45;&#45;:&#45;&#45;</time>
+            <span class="activity-dot neutral"></span>
+            <span>Waiting for irrigation activity</span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ IRRIGATION ============ -->
+    <section class="page secondary-page" id="irrigationSection" hidden>
+      <div class="secondary-page-header">
+        <p class="eyebrow">Irrigation control</p>
+        <h2>Manual &amp; automatic irrigation</h2>
+        <p>Direct pump control and irrigation threshold configuration for zone 01.</p>
+      </div>
+      <div class="secondary-grid">
+        <div class="secondary-block">
+          <h3>Current control mode</h3>
+          <p id="irrigationModeDetail">Loading controller state&hellip;</p>
+          <div class="control-buttons">
+            <button class="ctrl-btn start" id="secondaryPumpOnBtn"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Start</button>
+            <button class="ctrl-btn stop" id="secondaryPumpOffBtn"><svg viewBox="0 0 24 24"><use href="#i-stop"/></svg>Stop</button>
+          </div>
+        </div>
+        <div class="secondary-block">
+          <h3>Threshold logic</h3>
+          <p>Start irrigation below <strong class="tabular" id="secondaryOnThreshold">35%</strong> and stop above <strong class="tabular" id="secondaryOffThreshold">60%</strong>.</p>
+          <p class="secondary-note">Adjust these on the Dashboard or here in Settings.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section class="page secondary-page" id="historySection" hidden>
+      <div class="secondary-page-header">
+        <p class="eyebrow">Event log</p>
+        <h2>Irrigation history</h2>
+        <p>Recent events from this controller session.</p>
+      </div>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead><tr><th>Time</th><th>Event</th><th>Mode</th><th>Moisture</th></tr></thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="page secondary-page" id="settingsSection" hidden>
+      <div class="secondary-page-header">
+        <p class="eyebrow">System configuration</p>
+        <h2>Settings</h2>
+        <p>Connection details and controller status for your irrigation system.</p>
+      </div>
+      <div class="secondary-grid">
+        <div class="secondary-block">
+          <h3>Connection</h3>
+          <dl class="system-list">
+            <div><dt>Mode</dt><dd id="settingsDemoMode">&mdash;</dd></div>
+            <div><dt>API base URL</dt><dd class="code-value" id="settingsApiBase">&mdash;</dd></div>
+            <div><dt>Refresh interval</dt><dd class="tabular">2 seconds</dd></div>
+          </dl>
+        </div>
+        <div class="secondary-block">
+          <h3>Controller status</h3>
+          <dl class="system-list">
+            <div><dt>ESP32 status</dt><dd id="infoEspStatus">Connecting</dd></div>
+            <div><dt>Wi-Fi status</dt><dd id="infoWifiStatus">&mdash;</dd></div>
+            <div><dt>Signal strength</dt><dd class="tabular" id="infoSignal">&mdash;</dd></div>
+            <div><dt>System uptime</dt><dd class="tabular" id="infoUptime">&mdash;</dd></div>
+            <div><dt>Last sensor update</dt><dd class="tabular" id="infoLastUpdate">&mdash;</dd></div>
+            <div><dt>Pump status</dt><dd id="infoPumpStatus">&mdash;</dd></div>
+            <div><dt>Operating mode</dt><dd id="infoMode">&mdash;</dd></div>
+          </dl>
+        </div>
+        <div class="secondary-block">
+          <h3>Connect a real controller</h3>
+          <p>Set <code>DEMO_MODE</code> to <code>false</code> and update <code>ESP32_API.baseUrl</code> inside <code>script.js</code> to your device address, e.g. <code>http://192.168.1.120</code>. The ESP32 firmware must implement the REST endpoints listed in the code comments.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>Fieldwell &middot; ESP32 Smart Irrigation</span>
+      <span>Local controller dashboard</span>
+    </footer>
+  </main>
+</div>
+
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<div class="modal-backdrop" id="confirmationModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <p class="eyebrow">Manual control</p>
+    <h2 id="modalTitle">Turn irrigation pump on?</h2>
+    <p>This sends a manual pump command to the ESP32 controller.</p>
+    <div class="modal-actions">
+      <button class="ctrl-btn ghost" id="cancelPumpOn">Cancel</button>
+      <button class="ctrl-btn start" id="confirmPumpOn"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Turn pump on</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
